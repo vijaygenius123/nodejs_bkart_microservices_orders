@@ -34,8 +34,17 @@ app.post('/orders', (req, res) => {
         }).catch(err => {
         throw err;
     })
-
 })
+
+app.get("/orders", ((req, res) => {
+    Order.find()
+        .then(books => {
+            res.json(books)
+        })
+        .catch(err => {
+            throw  err
+        })
+}))
 
 app.listen(4002, () => {
     console.log("Up & Running! Orders Microservice");
