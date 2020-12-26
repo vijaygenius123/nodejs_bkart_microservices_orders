@@ -9,7 +9,7 @@ const app = express();
 const CUSTOMERS_SERVICE_URL = 'http://localhost:4001'
 const BOOKS_SERVICE_URL = 'http://localhost:4000'
 
-mongoose.connect("mongodb+srv://orders_user:orders_password@cluster0.cbckc.mongodb.net/orders?retryWrites=true&w=majority",
+mongoose.connect(process.env.MONGO_URI,
     {useUnifiedTopology: true},
     () => {
         console.log("DB Is Connected");
