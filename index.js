@@ -1,9 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const axios = require('axios');
 const {Order} = require('./Order');
 
 const app = express();
+
+const CUSTOMERS_SERVICE_URL = 'http://localhost:4001'
+const BOOKS_SERVICE_URL = 'http://localhost:4000'
 
 mongoose.connect("mongodb+srv://orders_user:orders_password@cluster0.cbckc.mongodb.net/orders?retryWrites=true&w=majority",
     {useUnifiedTopology: true},
@@ -45,6 +49,33 @@ app.get("/orders", ((req, res) => {
             throw  err
         })
 }))
+
+app.get("/order/:id", (req, res) => {
+    Order.findById(req.params.id)
+        .then(order => {
+            if(order){
+                axios(`${CUSTOMERS_SERVICE_URL}/customer/${order.customerId}`).then(response => {
+                        const customerObject = {customerName : response.data.name};
+                        axios(`${BOOKS_SERVICE_URL}/book/${order.bookId}`).then(response => {
+                            const bookObject = {bookName : response.data.title};
+
+                            const orderObject = {
+                                id: order._id,
+                                createdAt: order.createdAt,
+                                ...bookObject,
+                                ...customerObject
+                            }
+                            res.json(orderObject)
+                        })
+                    })
+            } else {
+                res.sendStatus(404);
+            }
+        })
+        .catch(err => {
+            throw err
+        })
+})
 
 app.listen(4002, () => {
     console.log("Up & Running! Orders Microservice");
